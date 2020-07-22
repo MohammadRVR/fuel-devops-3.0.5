@@ -159,24 +159,24 @@ class TestParamedModel(TestCase):
         d.save()
         g = models.Group(name='test', driver=d)
         g.save()
-        g.add_node(name='n1', role='fuel_slave', hypervisor='test', uuid='abc')
-        g.add_node(name='n2', role='fuel_slave', hypervisor='test', uuid='bcd')
-        g.add_node(name='n3', role='fuel_slave', hypervisor='kvm', uuid='cde')
-        g.add_node(name='n4', role='fuel_slave', hypervisor='kvm', uuid='def')
+        g.add_node(name='n1', role='fuel_subordinate', hypervisor='test', uuid='abc')
+        g.add_node(name='n2', role='fuel_subordinate', hypervisor='test', uuid='bcd')
+        g.add_node(name='n3', role='fuel_subordinate', hypervisor='kvm', uuid='cde')
+        g.add_node(name='n4', role='fuel_subordinate', hypervisor='kvm', uuid='def')
 
         assert len(g.node_set.all()) == 4
-        assert len(g.node_set.filter(role='fuel_slave')) == 4
+        assert len(g.node_set.filter(role='fuel_subordinate')) == 4
         assert len(g.node_set.filter(hypervisor='test')) == 2
         assert len(g.node_set.filter(name='n1', hypervisor='test')) == 1
         assert len(g.node_set.filter(uuid='def', hypervisor='kvm')) == 1
-        assert len(g.node_set.filter(name='n2', role='fuel_slave',
+        assert len(g.node_set.filter(name='n2', role='fuel_subordinate',
                                      hypervisor='test', uuid='bcd')) == 1
         assert len(g.node_set.filter(name='n1', hypervisor='kvm')) == 0
         assert len(g.node_set.filter(hypervisor='kvm', uuid='qqq')) == 0
 
         assert g.node_set.get(name='n1').uuid == 'abc'
         assert g.node_set.get(uuid='abc').name == 'n1'
-        assert g.node_set.get(role='fuel_slave', uuid='cde').name == 'n3'
+        assert g.node_set.get(role='fuel_subordinate', uuid='cde').name == 'n3'
         assert g.node_set.get(hypervisor='kvm', name='n4').uuid == 'def'
         with self.assertRaises(models.Node.DoesNotExist):
             g.node_set.get(hypervisor='kvm', uuid='bcd')

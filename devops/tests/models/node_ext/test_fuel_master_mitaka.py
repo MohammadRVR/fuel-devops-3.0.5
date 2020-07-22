@@ -17,7 +17,7 @@ import mock
 from devops.tests.driver.driverless import DriverlessTestCase
 
 
-class TestFuelMasterMitakaExt(DriverlessTestCase):
+class TestFuelMainMitakaExt(DriverlessTestCase):
 
     def patch(self, *args, **kwargs):
         patcher = mock.patch(*args, **kwargs)
@@ -26,11 +26,11 @@ class TestFuelMasterMitakaExt(DriverlessTestCase):
         return m
 
     def setUp(self):
-        super(TestFuelMasterMitakaExt, self).setUp()
+        super(TestFuelMainMitakaExt, self).setUp()
 
         self.node = self.group.add_node(
             name='test-node',
-            role='fuel_master_mitaka')
+            role='fuel_main_mitaka')
         self.node.add_volume(
             name='system')
         self.node.add_volume(

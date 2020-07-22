@@ -143,10 +143,10 @@ class Shell(object):
                    for net in self.env.get_address_pools()]
         self.print_table(headers=headers, columns=columns)
 
-    def do_slave_ip_list(self):
+    def do_subordinate_ip_list(self):
         address_pool_name = self.params.address_pool_name
 
-        slave_ips = {}
+        subordinate_ips = {}
         for l2dev in self.env.get_env_l2_network_devices():
             if l2dev.address_pool is None:
                 continue
@@ -154,23 +154,23 @@ class Shell(object):
                     l2dev.address_pool.name != address_pool_name:
                 continue
 
-            ap_slave_ips = []
+            ap_subordinate_ips = []
             for node in self.env.get_nodes():
                 if self.params.ip_only:
-                    ap_slave_ips.append(
+                    ap_subordinate_ips.append(
                         node.get_ip_address_by_network_name(l2dev.name))
                 else:
-                    ap_slave_ips.append(
+                    ap_subordinate_ips.append(
                         "{0},{1}".format(
                             node.name,
                             node.get_ip_address_by_network_name(l2dev.name)))
-            if ap_slave_ips:
-                slave_ips[l2dev.address_pool.name] = ap_slave_ips
+            if ap_subordinate_ips:
+                subordinate_ips[l2dev.address_pool.name] = ap_subordinate_ips
 
-        if not slave_ips:
+        if not subordinate_ips:
             sys.exit('No IPs were allocated for environment!')
 
-        for ap, n_ips in sorted(slave_ips.items()):
+        for ap, n_ips in sorted(subordinate_ips.items()):
             if address_pool_name:
                 print(' '.join(n_ips))
             else:
@@ -212,8 +212,8 @@ class Shell(object):
             admin_memory=self.params.admin_ram_size,
             admin_sysvolume_capacity=self.params.admin_disk_size,
             nodes_count=self.params.node_count,
-            slave_vcpu=self.params.vcpu_count,
-            slave_memory=self.params.ram_size,
+            subordinate_vcpu=self.params.vcpu_count,
+            subordinate_memory=self.params.ram_size,
             second_volume_capacity=self.params.second_disk_size,
             third_volume_capacity=self.params.third_disk_size,
             net_pool=self.params.net_pool.split(':'),
@@ -226,21 +226,21 @@ class Shell(object):
             self.params.env_config_name)
         env.define()
 
-    def do_slave_add(self):
-        self.env.add_slaves(
+    def do_subordinate_add(self):
+        self.env.add_subordinates(
             nodes_count=self.params.node_count,
-            slave_vcpu=self.params.vcpu_count,
-            slave_memory=self.params.ram_size,
+            subordinate_vcpu=self.params.vcpu_count,
+            subordinate_memory=self.params.ram_size,
             second_volume_capacity=self.params.second_disk_size,
             third_volume_capacity=self.params.third_disk_size,
         )
 
-    def do_slave_remove(self):
+    def do_subordinate_remove(self):
         # TODO(astudenov): add positional argument instead of option
         node = self.env.get_node(name=self.params.node_name)
         node.remove()
 
-    def do_slave_change(self):
+    def do_subordinate_change(self):
         node = self.env.get_node(name=self.params.node_name)
         # TODO(astudenov): check if node is under libvirt controll
         node.set_vcpu(vcpu=self.params.vcpu_count)
@@ -481,13 +481,13 @@ class Shell(object):
                               help="Show networks in environment",
                               description="Display allocated networks for "
                               "environment")
-        subparsers.add_parser('slave-ip-list',
+        subparsers.add_parser('subordinate-ip-list',
                               parents=[name_parser,
                                        address_pool_name,
                                        ip_only_parser],
-                              help="Show slave node IPs in environment",
+                              help="Show subordinate node IPs in environment",
                               description="Display allocated IPs for "
-                              "environment slave nodes")
+                              "environment subordinate nodes")
         subparsers.add_parser('time-sync',
                               parents=[name_parser, node_name_parser],
                               help="Sync time on all env nodes",
@@ -520,19 +520,19 @@ class Shell(object):
                               help="Create a new environment",
                               description="Create an environment from a "
                                           "template file"),
-        subparsers.add_parser('slave-add',
+        subparsers.add_parser('subordinate-add',
                               parents=[name_parser, node_count,
                                        ram_parser, vcpu_parser,
                                        second_disk_size, third_disk_size,
                                        group_name_parser],
                               help="Add a node",
                               description="Add a new node to environment")
-        subparsers.add_parser('slave-change',
+        subparsers.add_parser('subordinate-change',
                               parents=[name_parser, node_name_parser,
                                        change_ram_parser, change_vcpu_parser],
                               help="Change node VCPU and memory config",
                               description="Change count of VCPUs and memory")
-        subparsers.add_parser('slave-remove',
+        subparsers.add_parser('subordinate-remove',
                               parents=[name_parser, node_name_parser],
                               help="Remove node from environment",
                               description="Remove selected node from "

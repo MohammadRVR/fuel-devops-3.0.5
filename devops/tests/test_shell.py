@@ -154,11 +154,11 @@ class TestShell(unittest.TestCase):
                                  ips={'fuelweb_admin': '192.168.1.2',
                                       'public': '192.168.2.2',
                                       'storage': '192.168.3.2'}),
-                create_node_mock('slave-01', snapshots=[('snap1', 15)],
+                create_node_mock('subordinate-01', snapshots=[('snap1', 15)],
                                  ips={'fuelweb_admin': '192.168.1.3',
                                       'public': '192.168.2.3',
                                       'storage': '192.168.3.3'}),
-                create_node_mock('slave-02',
+                create_node_mock('subordinate-02',
                                  ips={'fuelweb_admin': '192.168.1.4',
                                       'public': '192.168.2.4',
                                       'storage': '192.168.3.4'}),
@@ -256,8 +256,8 @@ class TestShell(unittest.TestCase):
             '  VNC  NODE-NAME    GROUP-NAME\n'
             '-----  -----------  ------------\n'
             ' 5005  admin        rack-01\n'
-            ' 5005  slave-01     rack-01\n'
-            ' 5005  slave-02     rack-01')
+            ' 5005  subordinate-01     rack-01\n'
+            ' 5005  subordinate-02     rack-01')
 
     def test_show_none(self):
         sh = shell.Shell(['show', 'env2'])
@@ -330,7 +330,7 @@ class TestShell(unittest.TestCase):
         self.print_mock.assert_called_once_with(
             'SNAPSHOT    CREATED              NODES-NAMES\n'
             '----------  -------------------  ---------------\n'
-            'snap1       2016-05-12 17:12:15  admin, slave-01\n'
+            'snap1       2016-05-12 17:12:15  admin, subordinate-01\n'
             'snap2       2016-05-12 17:12:16  admin')
 
     def test_snapshot_list_none(self):
@@ -347,24 +347,24 @@ class TestShell(unittest.TestCase):
         self.client_inst.get_env.assert_called_once_with('env1')
         admin = self.nodes['env1']['admin']
         admin.erase_snapshot.assert_called_once_with(name='snap1')
-        slave = self.nodes['env1']['slave-01']
-        slave.erase_snapshot.assert_called_once_with(name='snap1')
+        subordinate = self.nodes['env1']['subordinate-01']
+        subordinate.erase_snapshot.assert_called_once_with(name='snap1')
 
-    def test_slave_ip_list(self):
-        sh = shell.Shell(['slave-ip-list', 'env1'])
+    def test_subordinate_ip_list(self):
+        sh = shell.Shell(['subordinate-ip-list', 'env1'])
         sh.execute()
 
         self.print_mock.assert_has_calls((
             mock.call('fuelweb_admin-pool01: admin,192.168.1.2'
-                      ' slave-01,192.168.1.3 slave-02,192.168.1.4'),
+                      ' subordinate-01,192.168.1.3 subordinate-02,192.168.1.4'),
             mock.call('public-pool01: admin,192.168.2.2'
-                      ' slave-01,192.168.2.3 slave-02,192.168.2.4'),
+                      ' subordinate-01,192.168.2.3 subordinate-02,192.168.2.4'),
             mock.call('storage-pool01: admin,192.168.3.2'
-                      ' slave-01,192.168.3.3 slave-02,192.168.3.4'),
+                      ' subordinate-01,192.168.3.3 subordinate-02,192.168.3.4'),
         ))
 
-    def test_slave_ip_list_ip_only(self):
-        sh = shell.Shell(['slave-ip-list', 'env1', '--ip-only'])
+    def test_subordinate_ip_list_ip_only(self):
+        sh = shell.Shell(['subordinate-ip-list', 'env1', '--ip-only'])
         sh.execute()
 
         self.print_mock.assert_has_calls((
@@ -374,17 +374,17 @@ class TestShell(unittest.TestCase):
             mock.call('storage-pool01: 192.168.3.2 192.168.3.3 192.168.3.4'),
         ))
 
-    def test_slave_ip_list_specific_ap(self):
-        sh = shell.Shell(['slave-ip-list', 'env1',
+    def test_subordinate_ip_list_specific_ap(self):
+        sh = shell.Shell(['subordinate-ip-list', 'env1',
                           '--address-pool-name', 'public-pool01'])
         sh.execute()
 
         self.print_mock.assert_called_once_with(
-            'admin,192.168.2.2 slave-01,192.168.2.3 slave-02,192.168.2.4')
+            'admin,192.168.2.2 subordinate-01,192.168.2.3 subordinate-02,192.168.2.4')
 
-    def test_slave_ip_list_specific_ap_ip_only(self):
+    def test_subordinate_ip_list_specific_ap_ip_only(self):
         sh = shell.Shell([
-            'slave-ip-list', 'env1',
+            'subordinate-ip-list', 'env1',
             '--address-pool-name', 'fuelweb_admin-pool01',
             '--ip-only'])
         sh.execute()
@@ -393,8 +393,8 @@ class TestShell(unittest.TestCase):
             '192.168.1.2 192.168.1.3 192.168.1.4'
         )
 
-    def test_slave_ip_list_empty(self):
-        sh = shell.Shell(['slave-ip-list', 'env2'])
+    def test_subordinate_ip_list_empty(self):
+        sh = shell.Shell(['subordinate-ip-list', 'env2'])
         sh.execute()
 
         self.sys_mock.exit.assert_called_once_with(
@@ -501,8 +501,8 @@ class TestShell(unittest.TestCase):
             admin_memory=2048,
             admin_sysvolume_capacity=80,
             nodes_count=5,
-            slave_vcpu=2,
-            slave_memory=512,
+            subordinate_vcpu=2,
+            subordinate_memory=512,
             second_volume_capacity=35,
             third_volume_capacity=45,
             net_pool=['10.109.0.0/16', '24'],
@@ -515,10 +515,10 @@ class TestShell(unittest.TestCase):
         self.client_inst.create_env_from_config.assert_called_once_with(
             'myenv.yaml')
 
-    def test_slave_add(self):
+    def test_subordinate_add(self):
         sh = shell.Shell(
             [
-                'slave-add', 'env1',
+                'subordinate-add', 'env1',
                 '--node-count', '5',
                 '--vcpu', '2',
                 '--ram', '512',
@@ -528,35 +528,35 @@ class TestShell(unittest.TestCase):
         sh.execute()
 
         self.client_inst.get_env.assert_called_once_with('env1')
-        self.env_mocks['env1'].add_slaves.assert_called_once_with(
+        self.env_mocks['env1'].add_subordinates.assert_called_once_with(
             nodes_count=5,
-            slave_vcpu=2,
-            slave_memory=512,
+            subordinate_vcpu=2,
+            subordinate_memory=512,
             second_volume_capacity=35,
             third_volume_capacity=45,
         )
 
-    def test_slave_remove(self):
-        sh = shell.Shell(['slave-remove', 'env1', '-N', 'slave-01'])
+    def test_subordinate_remove(self):
+        sh = shell.Shell(['subordinate-remove', 'env1', '-N', 'subordinate-01'])
         sh.execute()
 
         self.client_inst.get_env.assert_called_once_with('env1')
-        self.nodes['env1']['slave-01'].remove.assert_called_once_with()
+        self.nodes['env1']['subordinate-01'].remove.assert_called_once_with()
 
-    def test_slave_change(self):
+    def test_subordinate_change(self):
         sh = shell.Shell(
             [
-                'slave-change', 'env1',
-                '-N', 'slave-01',
+                'subordinate-change', 'env1',
+                '-N', 'subordinate-01',
                 '--vcpu', '4',
                 '--ram', '256',
             ])
         sh.execute()
 
         self.client_inst.get_env.assert_called_once_with('env1')
-        self.nodes['env1']['slave-01'].set_vcpu.assert_called_once_with(
+        self.nodes['env1']['subordinate-01'].set_vcpu.assert_called_once_with(
             vcpu=4)
-        self.nodes['env1']['slave-01'].set_memory.assert_called_once_with(
+        self.nodes['env1']['subordinate-01'].set_memory.assert_called_once_with(
             memory=256)
 
     def test_admin_change(self):
@@ -593,24 +593,24 @@ class TestShell(unittest.TestCase):
             iface='eth1')
 
     def test_node_start(self):
-        sh = shell.Shell(['node-start', 'env1', '-N', 'slave-01'])
+        sh = shell.Shell(['node-start', 'env1', '-N', 'subordinate-01'])
         sh.execute()
 
         self.client_inst.get_env.assert_called_once_with('env1')
-        self.nodes['env1']['slave-01'].start.assert_called_once_with()
+        self.nodes['env1']['subordinate-01'].start.assert_called_once_with()
 
     def test_node_destroy(self):
-        sh = shell.Shell(['node-destroy', 'env1', '-N', 'slave-01'])
+        sh = shell.Shell(['node-destroy', 'env1', '-N', 'subordinate-01'])
         sh.execute()
 
         self.client_inst.get_env.assert_called_once_with('env1')
         self.env_mocks['env1'].get_node.assert_called_once_with(
-            name='slave-01')
-        self.nodes['env1']['slave-01'].destroy.assert_called_once_with()
+            name='subordinate-01')
+        self.nodes['env1']['subordinate-01'].destroy.assert_called_once_with()
 
     def test_node_reset(self):
-        sh = shell.Shell(['node-reset', 'env1', '-N', 'slave-01'])
+        sh = shell.Shell(['node-reset', 'env1', '-N', 'subordinate-01'])
         sh.execute()
 
         self.client_inst.get_env.assert_called_once_with('env1')
-        self.nodes['env1']['slave-01'].reset.assert_called_once_with()
+        self.nodes['env1']['subordinate-01'].reset.assert_called_once_with()

@@ -39,10 +39,10 @@ class DevopsEnvironment(object):
     def __getattr__(self, name):
         return getattr(self._env, name)
 
-    def add_slaves(self,
+    def add_subordinates(self,
                    nodes_count,
-                   slave_vcpu=1,
-                   slave_memory=1024,
+                   subordinate_vcpu=1,
+                   subordinate_memory=1024,
                    second_volume_capacity=50,
                    third_volume_capacity=50,
                    force_define=True,
@@ -51,9 +51,9 @@ class DevopsEnvironment(object):
         group = self._env.get_group(name=group_name)
         created_node_names = [n.name for n in group.get_nodes()]
 
-        def get_available_slave_name():
+        def get_available_subordinate_name():
             for i in xrange(1, 1000):
-                name = "slave-{:02d}".format(i)
+                name = "subordinate-{:02d}".format(i)
                 if name in created_node_names:
                     continue
 
@@ -62,13 +62,13 @@ class DevopsEnvironment(object):
 
         new_nodes = []
         for node_num in xrange(nodes_count):
-            node_name = get_available_slave_name()
-            slave_conf = templates.create_slave_config(
-                slave_name=node_name,
-                slave_role='fuel_slave',
-                slave_vcpu=slave_vcpu,
-                slave_memory=slave_memory,
-                slave_volume_capacity=settings.NODE_VOLUME_SIZE,
+            node_name = get_available_subordinate_name()
+            subordinate_conf = templates.create_subordinate_config(
+                subordinate_name=node_name,
+                subordinate_role='fuel_subordinate',
+                subordinate_vcpu=subordinate_vcpu,
+                subordinate_memory=subordinate_memory,
+                subordinate_volume_capacity=settings.NODE_VOLUME_SIZE,
                 second_volume_capacity=second_volume_capacity,
                 third_volume_capacity=third_volume_capacity,
                 interfaceorder=settings.INTERFACE_ORDER,
@@ -79,7 +79,7 @@ class DevopsEnvironment(object):
                 networks_bonding=settings.BONDING,
                 networks_bondinginterfaces=settings.BONDING_INTERFACES,
             )
-            node = group.add_node(**slave_conf)
+            node = group.add_node(**subordinate_conf)
             if force_define is True:
                 for volume in node.get_volumes():
                     volume.define()
@@ -154,7 +154,7 @@ class DevopsEnvironment(object):
         node_mac = node.interfaces[0].mac_address
 
         nailgun_client = nailgun.NailgunClient(ip=self.get_admin_ip())
-        ip = nailgun_client.get_slave_ip_by_mac(node_mac)
+        ip = nailgun_client.get_subordinate_ip_by_mac(node_mac)
         return ip
 
     def get_node_remote(self, node_name,

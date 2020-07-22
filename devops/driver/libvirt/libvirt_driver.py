@@ -406,7 +406,7 @@ class LibvirtL2NetworkDevice(network.L2NetworkDevice):
        l2_network_devices:  # Libvirt bridges. It is *NOT* Nailgun networks
 
          # Admin/PXE network
-         # Virtual nodes can be connected here (Fuel master, OpenStack nodes).
+         # Virtual nodes can be connected here (Fuel main, OpenStack nodes).
          # A physical interface ${BAREMETAL_ADMIN_IFACE} will be added
          # to the libvirt network with name 'admin' to allow connectivity
          # between VMs, baremetal servers and system tests on this server.

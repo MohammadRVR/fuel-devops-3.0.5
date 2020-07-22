@@ -444,22 +444,22 @@ class Environment(base.BaseModel):
         class Nodes(object):
             def __init__(self, environment):
                 self.admins = sorted(
-                    list(environment.get_nodes(role__contains='master')),
+                    list(environment.get_nodes(role__contains='main')),
                     key=lambda node: node.name
                 )
                 self.others = sorted(
-                    list(environment.get_nodes(role='fuel_slave')),
+                    list(environment.get_nodes(role='fuel_subordinate')),
                     key=lambda node: node.name
                 )
                 self.ironics = sorted(
                     list(environment.get_nodes(role='ironic')),
                     key=lambda node: node.name
                 )
-                self.slaves = self.others
-                self.all = self.slaves + self.admins + self.ironics
+                self.subordinates = self.others
+                self.all = self.subordinates + self.admins + self.ironics
                 if len(self.admins) == 0:
                     raise error.DevopsEnvironmentError(
-                        "No nodes with role 'fuel_master' found in the "
+                        "No nodes with role 'fuel_main' found in the "
                         "environment {env_name}, please check environment "
                         "configuration".format(
                             env_name=environment.name

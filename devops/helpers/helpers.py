@@ -312,9 +312,9 @@ def get_admin_ip(env):
     return denv.get_admin_ip()
 
 
-def get_slave_ip(env, node_mac_address):
+def get_subordinate_ip(env, node_mac_address):
     msg = (
-        'get_slave_ip has been deprecated in favor of '
+        'get_subordinate_ip has been deprecated in favor of '
         'DevopsEnvironment.get_node_ip')
     logger.warning(msg)
     warnings.warn(msg, DeprecationWarning)
@@ -323,7 +323,7 @@ def get_slave_ip(env, node_mac_address):
     from devops.client import nailgun
     denv = client.DevopsClient().get_env(env.name)
     ng_client = nailgun.NailgunClient(ip=denv.get_admin_ip())
-    return ng_client.get_slave_ip_by_mac(node_mac_address)
+    return ng_client.get_subordinate_ip_by_mac(node_mac_address)
 
 
 def xmlrpctoken(uri, login, password):

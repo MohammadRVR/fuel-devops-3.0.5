@@ -196,11 +196,11 @@ IRONIC_NODES_COUNT = int(os.environ.get('IRONIC_NODES_COUNT', 0))
 HARDWARE = {
     "admin_node_memory": int(os.environ.get("ADMIN_NODE_MEMORY", 3072)),
     "admin_node_cpu": int(os.environ.get("ADMIN_NODE_CPU", 2)),
-    "slave_node_cpu": int(os.environ.get("SLAVE_NODE_CPU", 2)),
-    "slave_node_memory": int(os.environ.get("SLAVE_NODE_MEMORY", 3027)),
+    "subordinate_node_cpu": int(os.environ.get("SLAVE_NODE_CPU", 2)),
+    "subordinate_node_memory": int(os.environ.get("SLAVE_NODE_MEMORY", 3027)),
     # Number of NUMA nodes on each VM node.
-    # Each NUMA node will have (<admin|slave>_node_cpu/numa_nodes) CPUs
-    # and (<admin|slave>_node_memory/numa_nodes) memory.
+    # Each NUMA node will have (<admin|subordinate>_node_cpu/numa_nodes) CPUs
+    # and (<admin|subordinate>_node_memory/numa_nodes) memory.
     "numa_nodes": int(os.environ.get("NUMA_NODES", 0)),
 }
 

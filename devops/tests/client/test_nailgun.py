@@ -54,7 +54,7 @@ class TestNailgunClient(TestCase):
         self.k2_session_inst.get.assert_called_once_with(
             '/nodes', endpoint_filter={'service_type': 'fuel'})
 
-    def test_get_slave_ip_by_mac(self):
+    def test_get_subordinate_ip_by_mac(self):
         self.nodes_mock.json.return_value = [
             {
                 'ip': '10.109.0.100',
@@ -66,12 +66,12 @@ class TestNailgunClient(TestCase):
             }
         ]
 
-        ip = self.nc.get_slave_ip_by_mac('64:52:dc:96:12:cc')
+        ip = self.nc.get_subordinate_ip_by_mac('64:52:dc:96:12:cc')
         assert ip == '10.109.0.100'
-        ip = self.nc.get_slave_ip_by_mac('64.52.dc.96.12.cc')
+        ip = self.nc.get_subordinate_ip_by_mac('64.52.dc.96.12.cc')
         assert ip == '10.109.0.100'
-        ip = self.nc.get_slave_ip_by_mac('6452dc9612cc')
+        ip = self.nc.get_subordinate_ip_by_mac('6452dc9612cc')
         assert ip == '10.109.0.100'
 
         with self.assertRaises(error.DevopsError):
-            self.nc.get_slave_ip_by_mac('a1a1a1a1a1a1')
+            self.nc.get_subordinate_ip_by_mac('a1a1a1a1a1a1')

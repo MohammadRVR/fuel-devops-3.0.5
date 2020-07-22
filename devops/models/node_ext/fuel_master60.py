@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from devops.models.node_ext import fuel_master
+from devops.models.node_ext import fuel_main
 
 
-class NodeExtension(fuel_master.NodeExtension):
+class NodeExtension(fuel_main.NodeExtension):
     """Extension for Fuel 6.0"""
 
     def get_kernel_cmd(self, boot_from='cdrom', iface='enp0s3',

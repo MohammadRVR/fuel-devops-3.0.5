@@ -258,7 +258,7 @@ class TestVolumeXml(BaseTestXMLBuilder):
             name='test_name',
             capacity=1048576,
             vol_format='qcow2',
-            backing_store_path='/tmp/master.img',
+            backing_store_path='/tmp/main.img',
             backing_store_format='raw',
         )
         assert xml == ('<?xml version="1.0" encoding="utf-8"?>\n'
@@ -272,7 +272,7 @@ class TestVolumeXml(BaseTestXMLBuilder):
                        '        </permissions>\n'
                        '    </target>\n'
                        '    <backingStore>\n'
-                       '        <path>/tmp/master.img</path>\n'
+                       '        <path>/tmp/main.img</path>\n'
                        '        <format type="raw"/>\n'
                        '    </backingStore>\n'
                        '</volume>\n')

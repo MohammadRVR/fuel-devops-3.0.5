@@ -129,7 +129,7 @@ template:
 
        nodes:
         - name: admin        # Custom name of VM for Fuel admin node
-          role: fuel_master  # Fixed role for Fuel master node properties
+          role: fuel_main  # Fixed role for Fuel main node properties
           params:
             vcpu: 2
             memory: 3072
@@ -156,11 +156,11 @@ template:
                 networks:
                  - fuelweb_admin
 
-          # Slave nodes
+          # Subordinate nodes
 
-        - name: slave-01
-          role: fuel_slave
-          params:  &rack-01-slave-node-params
+        - name: subordinate-01
+          role: fuel_subordinate
+          params:  &rack-01-subordinate-node-params
             vcpu: 2
             memory: 3072
             hypervisor: test
@@ -217,9 +217,9 @@ template:
                  - private
 
 
-        - name: slave-02
-          role: fuel_slave
-          params: *rack-01-slave-node-params
+        - name: subordinate-02
+          role: fuel_subordinate
+          params: *rack-01-subordinate-node-params
 """
 
 
@@ -271,23 +271,23 @@ class TestLibvirtTemplate(LibvirtTestCase):
         assert len(adm_eth0.addresses) == 1
         assert_ip_in_net(adm_eth0.addresses[0].ip_address, admin_net)
 
-        for node_name in ('slave-01', 'slave-02'):
-            slave_node = self.env.get_node(name=node_name)
-            slave_eth0 = slave_node.interface_set.get(label='eth0')
-            assert len(slave_eth0.addresses) == 1
-            assert_ip_in_net(slave_eth0.addresses[0].ip_address, admin_net)
-            slave_eth2 = slave_node.interface_set.get(label='eth1')
-            assert len(slave_eth2.addresses) == 1
-            assert_ip_in_net(slave_eth2.addresses[0].ip_address, pub_net)
-            slave_eth2 = slave_node.interface_set.get(label='eth2')
-            assert len(slave_eth2.addresses) == 1
-            assert_ip_in_net(slave_eth2.addresses[0].ip_address, stor_net)
-            slave_eth3 = slave_node.interface_set.get(label='eth3')
-            assert len(slave_eth3.addresses) == 1
-            assert_ip_in_net(slave_eth3.addresses[0].ip_address, mng_net)
-            slave_eth4 = slave_node.interface_set.get(label='eth4')
-            assert len(slave_eth4.addresses) == 1
-            assert_ip_in_net(slave_eth4.addresses[0].ip_address, priv_net)
+        for node_name in ('subordinate-01', 'subordinate-02'):
+            subordinate_node = self.env.get_node(name=node_name)
+            subordinate_eth0 = subordinate_node.interface_set.get(label='eth0')
+            assert len(subordinate_eth0.addresses) == 1
+            assert_ip_in_net(subordinate_eth0.addresses[0].ip_address, admin_net)
+            subordinate_eth2 = subordinate_node.interface_set.get(label='eth1')
+            assert len(subordinate_eth2.addresses) == 1
+            assert_ip_in_net(subordinate_eth2.addresses[0].ip_address, pub_net)
+            subordinate_eth2 = subordinate_node.interface_set.get(label='eth2')
+            assert len(subordinate_eth2.addresses) == 1
+            assert_ip_in_net(subordinate_eth2.addresses[0].ip_address, stor_net)
+            subordinate_eth3 = subordinate_node.interface_set.get(label='eth3')
+            assert len(subordinate_eth3.addresses) == 1
+            assert_ip_in_net(subordinate_eth3.addresses[0].ip_address, mng_net)
+            subordinate_eth4 = subordinate_node.interface_set.get(label='eth4')
+            assert len(subordinate_eth4.addresses) == 1
+            assert_ip_in_net(subordinate_eth4.addresses[0].ip_address, priv_net)
 
     def test_db(self):
         # groups
@@ -331,7 +331,7 @@ class TestLibvirtTemplate(LibvirtTestCase):
 
         # admin node
         admin_node = self.env.get_node(name='admin')
-        assert admin_node.role == 'fuel_master'
+        assert admin_node.role == 'fuel_main'
         assert admin_node.vcpu == 2
         assert admin_node.memory == 3072
         assert admin_node.hypervisor == 'test'
@@ -362,108 +362,108 @@ class TestLibvirtTemplate(LibvirtTestCase):
         assert adm_nc.parents == []
         assert adm_nc.aggregation is None
 
-        # slave nodes
-        for slave_name in ('slave-01', 'slave-02'):
-            slave_node = self.env.get_node(name=slave_name)
-            assert slave_node.role == 'fuel_slave'
-            assert slave_node.vcpu == 2
-            assert slave_node.memory == 3072
-            assert slave_node.hypervisor == 'test'
-            assert slave_node.architecture == 'i686'
-            assert slave_node.boot == ['network', 'hd']
+        # subordinate nodes
+        for subordinate_name in ('subordinate-01', 'subordinate-02'):
+            subordinate_node = self.env.get_node(name=subordinate_name)
+            assert subordinate_node.role == 'fuel_subordinate'
+            assert subordinate_node.vcpu == 2
+            assert subordinate_node.memory == 3072
+            assert subordinate_node.hypervisor == 'test'
+            assert subordinate_node.architecture == 'i686'
+            assert subordinate_node.boot == ['network', 'hd']
 
             # Volumes and Disks
-            slave_sys_vol = slave_node.get_volume(name='system')
-            assert slave_sys_vol
-            assert slave_sys_vol.capacity == 10
-            assert slave_sys_vol.format == 'qcow2'
-            slave_sys_disk = slave_node.diskdevice_set.get(
-                volume=slave_sys_vol)
-            assert slave_sys_disk.device == 'disk'
-            assert slave_sys_disk.bus == 'virtio'
-            assert slave_sys_disk.target_dev == 'sda'
-            slave_cinder_vol = slave_node.get_volume(name='cinder')
-            assert slave_cinder_vol
-            assert slave_cinder_vol.capacity == 10
-            assert slave_cinder_vol.format == 'qcow2'
-            slave_cinder_disk = slave_node.diskdevice_set.get(
-                volume=slave_cinder_vol)
-            assert slave_cinder_disk.device == 'disk'
-            assert slave_cinder_disk.bus == 'virtio'
-            assert slave_cinder_disk.target_dev == 'sdb'
-            slave_swift_vol = slave_node.get_volume(name='swift')
-            assert slave_swift_vol
-            assert slave_swift_vol.capacity == 10
-            assert slave_swift_vol.format == 'qcow2'
-            slave_swift_disk = slave_node.diskdevice_set.get(
-                volume=slave_swift_vol)
-            assert slave_swift_disk.device == 'disk'
-            assert slave_swift_disk.bus == 'virtio'
-            assert slave_swift_disk.target_dev == 'sdc'
+            subordinate_sys_vol = subordinate_node.get_volume(name='system')
+            assert subordinate_sys_vol
+            assert subordinate_sys_vol.capacity == 10
+            assert subordinate_sys_vol.format == 'qcow2'
+            subordinate_sys_disk = subordinate_node.diskdevice_set.get(
+                volume=subordinate_sys_vol)
+            assert subordinate_sys_disk.device == 'disk'
+            assert subordinate_sys_disk.bus == 'virtio'
+            assert subordinate_sys_disk.target_dev == 'sda'
+            subordinate_cinder_vol = subordinate_node.get_volume(name='cinder')
+            assert subordinate_cinder_vol
+            assert subordinate_cinder_vol.capacity == 10
+            assert subordinate_cinder_vol.format == 'qcow2'
+            subordinate_cinder_disk = subordinate_node.diskdevice_set.get(
+                volume=subordinate_cinder_vol)
+            assert subordinate_cinder_disk.device == 'disk'
+            assert subordinate_cinder_disk.bus == 'virtio'
+            assert subordinate_cinder_disk.target_dev == 'sdb'
+            subordinate_swift_vol = subordinate_node.get_volume(name='swift')
+            assert subordinate_swift_vol
+            assert subordinate_swift_vol.capacity == 10
+            assert subordinate_swift_vol.format == 'qcow2'
+            subordinate_swift_disk = subordinate_node.diskdevice_set.get(
+                volume=subordinate_swift_vol)
+            assert subordinate_swift_disk.device == 'disk'
+            assert subordinate_swift_disk.bus == 'virtio'
+            assert subordinate_swift_disk.target_dev == 'sdc'
 
             # Interfaces
-            slave_eth0 = slave_node.interface_set.get(label='eth0')
-            assert slave_eth0
-            assert slave_eth0.label == 'eth0'
-            assert slave_eth0.model == 'e1000'
-            assert slave_eth0.l2_network_device.name == 'admin'
-            assert slave_eth0.features == []
-            slave_eth1 = slave_node.interface_set.get(label='eth1')
-            assert slave_eth1
-            assert slave_eth1.label == 'eth1'
-            assert slave_eth1.model == 'e1000'
-            assert slave_eth1.l2_network_device.name == 'public'
-            assert slave_eth1.features == []
-            slave_eth2 = slave_node.interface_set.get(label='eth2')
-            assert slave_eth2
-            assert slave_eth2.label == 'eth2'
-            assert slave_eth2.model == 'e1000'
-            assert slave_eth2.l2_network_device.name == 'storage'
-            assert slave_eth2.features == []
-            slave_eth3 = slave_node.interface_set.get(label='eth3')
-            assert slave_eth3
-            assert slave_eth3.label == 'eth3'
-            assert slave_eth3.model == 'e1000'
-            assert slave_eth3.l2_network_device.name == 'management'
-            assert slave_eth3.features == []
-            slave_eth4 = slave_node.interface_set.get(label='eth4')
-            assert slave_eth4
-            assert slave_eth4.label == 'eth4'
-            assert slave_eth4.model == 'e1000'
-            assert slave_eth4.features == ['sriov']
+            subordinate_eth0 = subordinate_node.interface_set.get(label='eth0')
+            assert subordinate_eth0
+            assert subordinate_eth0.label == 'eth0'
+            assert subordinate_eth0.model == 'e1000'
+            assert subordinate_eth0.l2_network_device.name == 'admin'
+            assert subordinate_eth0.features == []
+            subordinate_eth1 = subordinate_node.interface_set.get(label='eth1')
+            assert subordinate_eth1
+            assert subordinate_eth1.label == 'eth1'
+            assert subordinate_eth1.model == 'e1000'
+            assert subordinate_eth1.l2_network_device.name == 'public'
+            assert subordinate_eth1.features == []
+            subordinate_eth2 = subordinate_node.interface_set.get(label='eth2')
+            assert subordinate_eth2
+            assert subordinate_eth2.label == 'eth2'
+            assert subordinate_eth2.model == 'e1000'
+            assert subordinate_eth2.l2_network_device.name == 'storage'
+            assert subordinate_eth2.features == []
+            subordinate_eth3 = subordinate_node.interface_set.get(label='eth3')
+            assert subordinate_eth3
+            assert subordinate_eth3.label == 'eth3'
+            assert subordinate_eth3.model == 'e1000'
+            assert subordinate_eth3.l2_network_device.name == 'management'
+            assert subordinate_eth3.features == []
+            subordinate_eth4 = subordinate_node.interface_set.get(label='eth4')
+            assert subordinate_eth4
+            assert subordinate_eth4.label == 'eth4'
+            assert subordinate_eth4.model == 'e1000'
+            assert subordinate_eth4.features == ['sriov']
 
             # Network Configs
-            assert slave_eth4.l2_network_device.name == 'private'
-            slave_eth0_nc = slave_node.networkconfig_set.get(label='eth0')
-            assert slave_eth0_nc
-            assert slave_eth0_nc.label == 'eth0'
-            assert slave_eth0_nc.networks == ['fuelweb_admin']
-            assert slave_eth0_nc.parents == []
-            assert slave_eth0_nc.aggregation is None
-            slave_eth1_nc = slave_node.networkconfig_set.get(label='eth1')
-            assert slave_eth1_nc
-            assert slave_eth1_nc.label == 'eth1'
-            assert slave_eth1_nc.networks == ['public']
-            assert slave_eth1_nc.parents == []
-            assert slave_eth1_nc.aggregation is None
-            slave_eth2_nc = slave_node.networkconfig_set.get(label='eth2')
-            assert slave_eth2_nc
-            assert slave_eth2_nc.label == 'eth2'
-            assert slave_eth2_nc.networks == ['storage']
-            assert slave_eth2_nc.parents == []
-            assert slave_eth2_nc.aggregation is None
-            slave_eth3_nc = slave_node.networkconfig_set.get(label='eth3')
-            assert slave_eth3_nc
-            assert slave_eth3_nc.label == 'eth3'
-            assert slave_eth3_nc.networks == ['management']
-            assert slave_eth3_nc.parents == []
-            assert slave_eth3_nc.aggregation is None
-            slave_eth4_nc = slave_node.networkconfig_set.get(label='eth4')
-            assert slave_eth4_nc
-            assert slave_eth4_nc.label == 'eth4'
-            assert slave_eth4_nc.networks == ['private']
-            assert slave_eth4_nc.parents == []
-            assert slave_eth4_nc.aggregation is None
+            assert subordinate_eth4.l2_network_device.name == 'private'
+            subordinate_eth0_nc = subordinate_node.networkconfig_set.get(label='eth0')
+            assert subordinate_eth0_nc
+            assert subordinate_eth0_nc.label == 'eth0'
+            assert subordinate_eth0_nc.networks == ['fuelweb_admin']
+            assert subordinate_eth0_nc.parents == []
+            assert subordinate_eth0_nc.aggregation is None
+            subordinate_eth1_nc = subordinate_node.networkconfig_set.get(label='eth1')
+            assert subordinate_eth1_nc
+            assert subordinate_eth1_nc.label == 'eth1'
+            assert subordinate_eth1_nc.networks == ['public']
+            assert subordinate_eth1_nc.parents == []
+            assert subordinate_eth1_nc.aggregation is None
+            subordinate_eth2_nc = subordinate_node.networkconfig_set.get(label='eth2')
+            assert subordinate_eth2_nc
+            assert subordinate_eth2_nc.label == 'eth2'
+            assert subordinate_eth2_nc.networks == ['storage']
+            assert subordinate_eth2_nc.parents == []
+            assert subordinate_eth2_nc.aggregation is None
+            subordinate_eth3_nc = subordinate_node.networkconfig_set.get(label='eth3')
+            assert subordinate_eth3_nc
+            assert subordinate_eth3_nc.label == 'eth3'
+            assert subordinate_eth3_nc.networks == ['management']
+            assert subordinate_eth3_nc.parents == []
+            assert subordinate_eth3_nc.aggregation is None
+            subordinate_eth4_nc = subordinate_node.networkconfig_set.get(label='eth4')
+            assert subordinate_eth4_nc
+            assert subordinate_eth4_nc.label == 'eth4'
+            assert subordinate_eth4_nc.networks == ['private']
+            assert subordinate_eth4_nc.parents == []
+            assert subordinate_eth4_nc.aggregation is None
 
     def test_life_cycle(self):
         assert len(self.d.get_allocated_networks()) == 0
@@ -493,8 +493,8 @@ class TestLibvirtTemplate(LibvirtTestCase):
 
         assert sorted(self.d.conn.listDefinedDomains()) == [
             'test_env_admin',
-            'test_env_slave-01',
-            'test_env_slave-02',
+            'test_env_subordinate-01',
+            'test_env_subordinate-02',
         ]
 
         self.env.start()
@@ -555,7 +555,7 @@ class TestLibvirtTemplate(LibvirtTestCase):
         with self.assertRaises(DevopsObjNotFound):
             Group.get(name='other-group')
 
-        node = self.env.get_node(name='slave-01')
+        node = self.env.get_node(name='subordinate-01')
 
         with self.assertRaises(DevopsObjNotFound):
             node.get_volume(name='other-volume')

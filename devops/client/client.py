@@ -57,8 +57,8 @@ class DevopsClient(object):
                    admin_memory=None,
                    admin_sysvolume_capacity=None,
                    nodes_count=None,
-                   slave_vcpu=None,
-                   slave_memory=None,
+                   subordinate_vcpu=None,
+                   subordinate_memory=None,
                    second_volume_capacity=None,
                    third_volume_capacity=None,
                    net_pool=None):
@@ -87,9 +87,9 @@ class DevopsClient(object):
             admin_iso_path=admin_iso_path or settings.ISO_PATH,
             nodes_count=nodes_count or settings.NODES_COUNT,
             numa_nodes=hw['numa_nodes'],
-            slave_vcpu=slave_vcpu or hw['slave_node_cpu'],
-            slave_memory=slave_memory or hw["slave_node_memory"],
-            slave_volume_capacity=settings.NODE_VOLUME_SIZE,
+            subordinate_vcpu=subordinate_vcpu or hw['subordinate_node_cpu'],
+            subordinate_memory=subordinate_memory or hw["subordinate_node_memory"],
+            subordinate_volume_capacity=settings.NODE_VOLUME_SIZE,
             second_volume_capacity=(
                 second_volume_capacity or settings.NODE_VOLUME_SIZE),
             third_volume_capacity=(

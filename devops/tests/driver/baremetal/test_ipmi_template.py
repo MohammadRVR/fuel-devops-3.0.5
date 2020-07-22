@@ -56,8 +56,8 @@ template:
            address_pool: fuelweb_admin-pool01
 
        nodes:
-        - name: slave-01  # Custom name of baremetal for Fuel slave node
-          role: fuel_slave  # Fixed role for Fuel master node properties
+        - name: subordinate-01  # Custom name of baremetal for Fuel subordinate node
+          role: fuel_subordinate  # Fixed role for Fuel main node properties
           params:
             ipmi_user: user1
             ipmi_password: pass1
@@ -75,8 +75,8 @@ template:
                  networks:
                     - fuelweb_admin  ## OpenStack network, NOT switch name
 
-        - name: slave-02  # Custom name of baremetal for Fuel slave node
-          role: fuel_slave  # Fixed role for Fuel master node properties
+        - name: subordinate-02  # Custom name of baremetal for Fuel subordinate node
+          role: fuel_subordinate  # Fixed role for Fuel main node properties
           params:
             ipmi_user: user2
             ipmi_password: pass2
@@ -121,16 +121,16 @@ class TestIPMITemplate(TestCase):
 
         def get_client(*args):
             """Tricky way to return necessary node """
-            if args and args[6] == 'slave-01':
+            if args and args[6] == 'subordinate-01':
                 return self.ipmiclient1
-            elif args and args[6] == 'slave-02':
+            elif args and args[6] == 'subordinate-02':
                 return self.ipmiclient2
 
         self.ipmiclient_mock.side_effect = get_client
 
     def test_db(self):
         """Tets DB """
-        node = self.env.get_node(name='slave-01')
+        node = self.env.get_node(name='subordinate-01')
         assert node.ipmi_user == 'user1'
         assert node.ipmi_password == 'pass1'
         assert node.ipmi_previlegies == 'OPERATOR'
@@ -138,7 +138,7 @@ class TestIPMITemplate(TestCase):
         assert node.ipmi_lan_interface == 'lanplus'
         assert node.ipmi_port == 623
 
-        node2 = self.env.get_node(name='slave-02')
+        node2 = self.env.get_node(name='subordinate-02')
         assert node2.ipmi_user == 'user2'
         assert node2.ipmi_password == 'pass2'
         assert node2.ipmi_previlegies == 'OPERATOR'
@@ -154,10 +154,10 @@ class TestIPMITemplate(TestCase):
         assert self.ipmiclient_mock.call_count == 2
         self.ipmiclient_mock.assert_any_call(
             'user1', 'pass1', 'ipmi-1.host.address.net', 'OPERATOR',
-            'lanplus', 623, 'slave-01')
+            'lanplus', 623, 'subordinate-01')
         self.ipmiclient_mock.assert_any_call(
             'user2', 'pass2', 'ipmi-2.host.address.net', 'OPERATOR',
-            'lanplus', 623, 'slave-02')
+            'lanplus', 623, 'subordinate-02')
         self.ipmiclient1.power_on.assert_called_once_with()
 
         self.env.destroy()

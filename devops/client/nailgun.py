@@ -35,7 +35,7 @@ class NailgunClient(object):
             tenant_name=settings.KEYSTONE_CREDS['tenant_name'])
         return KeystoneSession(auth=keystone_auth, verify=False)
 
-    def get_slave_ip_by_mac(self, mac):
+    def get_subordinate_ip_by_mac(self, mac):
         nodes = self.get_nodes_json()
 
         def poor_mac(mac_addr):
