@@ -178,7 +178,7 @@ def create_admin_config(admin_vcpu, admin_memory, admin_sysvolume_capacity,
 
     admin_config = {
         'name': 'admin',  # Custom name of VM for Fuel admin node
-        'role': 'fuel_master',  # Fixed role for (Fuel admin) node properties
+        'role': 'fuel_main',  # Fixed role for (Fuel admin) node properties
         'params': {
             'vcpu': admin_vcpu,
             'memory': admin_memory,
@@ -206,8 +206,8 @@ def create_admin_config(admin_vcpu, admin_memory, admin_sysvolume_capacity,
     return admin_config
 
 
-def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
-                        slave_volume_capacity,
+def create_subordinate_config(subordinate_name, subordinate_role, subordinate_vcpu, subordinate_memory,
+                        subordinate_volume_capacity,
                         interfaceorder,
                         numa_nodes,
                         second_volume_capacity=None,
@@ -220,8 +220,8 @@ def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
                         networks_bondinginterfaces=None):
 
     if networks_multiplenetworks:
-        nodegroups_idx = 1 - int(slave_name[-2:]) % 2
-        slave_interfaces = [
+        nodegroups_idx = 1 - int(subordinate_name[-2:]) % 2
+        subordinate_interfaces = [
             {
                 'label': 'iface' + str(n),
                 'l2_network_device': iname,
@@ -240,7 +240,7 @@ def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
             for iname in networks_bondinginterfaces
             for label in networks_bondinginterfaces[iname]
         }
-        slave_interfaces = [
+        subordinate_interfaces = [
             {
                 'label': label,
                 'l2_network_device': ifaces[label],
@@ -248,7 +248,7 @@ def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
             } for label in sorted(ifaces.keys())
         ]
     else:
-        slave_interfaces = [
+        subordinate_interfaces = [
             {
                 'label': 'iface' + str(n),
                 'l2_network_device': iname,
@@ -282,13 +282,13 @@ def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
                 if iface['l2_network_device'] != 'admin'
                 else 'fuelweb_admin',
             ]
-        } for iface in slave_interfaces
+        } for iface in subordinate_interfaces
     }
 
     volumes = [
         {
             'name': 'system',
-            'capacity': slave_volume_capacity,
+            'capacity': subordinate_volume_capacity,
             'multipath_count': multipath_count,
         }
     ]
@@ -296,12 +296,12 @@ def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
         volumes.extend([
             {
                 'name': 'cinder',
-                'capacity': second_volume_capacity or slave_volume_capacity,
+                'capacity': second_volume_capacity or subordinate_volume_capacity,
                 'multipath_count': multipath_count,
             },
             {
                 'name': 'swift',
-                'capacity': third_volume_capacity or slave_volume_capacity,
+                'capacity': third_volume_capacity or subordinate_volume_capacity,
             }
         ])
     else:
@@ -323,24 +323,24 @@ def create_slave_config(slave_name, slave_role, slave_vcpu, slave_memory,
 
     numa = _calculate_numa(
         numa_nodes=numa_nodes,
-        vcpu=slave_vcpu,
-        memory=slave_memory,
-        name=slave_name)
+        vcpu=subordinate_vcpu,
+        memory=subordinate_memory,
+        name=subordinate_name)
 
-    slave_config = {
-        'name': slave_name,
-        'role': slave_role,
+    subordinate_config = {
+        'name': subordinate_name,
+        'role': subordinate_role,
         'params': {
-            'vcpu': slave_vcpu,
-            'memory': slave_memory,
+            'vcpu': subordinate_vcpu,
+            'memory': subordinate_memory,
             'boot': ['network', 'hd'],
             'numa': numa,
             'volumes': volumes,
-            'interfaces': slave_interfaces,
+            'interfaces': subordinate_interfaces,
             'network_config': network_config,
         },
     }
-    return slave_config
+    return subordinate_config
 
 
 def create_netpools(interfaceorder):
@@ -448,9 +448,9 @@ def create_devops_config(boot_from,
                          admin_iso_path,
                          nodes_count,
                          numa_nodes,
-                         slave_vcpu,
-                         slave_memory,
-                         slave_volume_capacity,
+                         subordinate_vcpu,
+                         subordinate_memory,
+                         subordinate_volume_capacity,
                          second_volume_capacity,
                          third_volume_capacity,
                          use_all_disks,
@@ -492,7 +492,7 @@ def create_devops_config(boot_from,
     l2_network_devices = create_l2_network_devices(l2_interfaceorder,
                                                    networks_dhcp,
                                                    networks_forwarding)
-    # Create admin and slave nodes
+    # Create admin and subordinate nodes
     config_nodes = []
 
     admin_config = create_admin_config(
@@ -508,15 +508,15 @@ def create_devops_config(boot_from,
 
     config_nodes.append(admin_config)
 
-    for slave_n in range(1, nodes_count):
-        slave_name = 'slave-{0:0>2}'.format(slave_n)
+    for subordinate_n in range(1, nodes_count):
+        subordinate_name = 'subordinate-{0:0>2}'.format(subordinate_n)
 
-        slave_config = create_slave_config(
-            slave_name=slave_name,
-            slave_role='fuel_slave',
-            slave_vcpu=slave_vcpu,
-            slave_memory=slave_memory,
-            slave_volume_capacity=slave_volume_capacity,
+        subordinate_config = create_subordinate_config(
+            subordinate_name=subordinate_name,
+            subordinate_role='fuel_subordinate',
+            subordinate_vcpu=subordinate_vcpu,
+            subordinate_memory=subordinate_memory,
+            subordinate_volume_capacity=subordinate_volume_capacity,
             second_volume_capacity=second_volume_capacity,
             third_volume_capacity=third_volume_capacity,
             interfaceorder=l2_interfaceorder,
@@ -528,17 +528,17 @@ def create_devops_config(boot_from,
             networks_bonding=networks_bonding,
             networks_bondinginterfaces=networks_bondinginterfaces)
 
-        config_nodes.append(slave_config)
+        config_nodes.append(subordinate_config)
 
     for ironic_n in range(1, ironic_nodes_count + 1):
-        ironic_name = 'ironic-slave-{0:0>2}'.format(ironic_n)
+        ironic_name = 'ironic-subordinate-{0:0>2}'.format(ironic_n)
 
-        ironic_config = create_slave_config(
-            slave_name=ironic_name,
-            slave_role='ironic_slave',
-            slave_vcpu=slave_vcpu,
-            slave_memory=slave_memory,
-            slave_volume_capacity=slave_volume_capacity,
+        ironic_config = create_subordinate_config(
+            subordinate_name=ironic_name,
+            subordinate_role='ironic_subordinate',
+            subordinate_vcpu=subordinate_vcpu,
+            subordinate_memory=subordinate_memory,
+            subordinate_volume_capacity=subordinate_volume_capacity,
             interfaceorder=['ironic'],
             numa_nodes=numa_nodes,
             use_all_disks=False)

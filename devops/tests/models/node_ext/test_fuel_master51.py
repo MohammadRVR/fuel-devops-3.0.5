@@ -14,11 +14,11 @@
 
 import mock
 
-from devops.models.node_ext.fuel_master51 import NodeExtension
+from devops.models.node_ext.fuel_main51 import NodeExtension
 from devops.tests.driver.driverless import DriverlessTestCase
 
 
-class TestFuelMaster51Ext(DriverlessTestCase):
+class TestFuelMain51Ext(DriverlessTestCase):
 
     def patch(self, *args, **kwargs):
         patcher = mock.patch(*args, **kwargs)
@@ -27,11 +27,11 @@ class TestFuelMaster51Ext(DriverlessTestCase):
         return m
 
     def setUp(self):
-        super(TestFuelMaster51Ext, self).setUp()
+        super(TestFuelMain51Ext, self).setUp()
 
         self.node = self.group.add_node(
             name='test-node',
-            role='fuel_master51')
+            role='fuel_main51')
         self.node.add_volume(
             name='system')
         self.node.add_volume(

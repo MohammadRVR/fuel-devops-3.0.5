@@ -49,10 +49,10 @@ class ExtendableNodeType(base.ParamedModelType):
     def post_remove(self):
 
     For example, if some method should be called *before* each invocation of
-    Node.start() for the role 'fuel_slave', then:
+    Node.start() for the role 'fuel_subordinate', then:
     - add a pre_start(self) method to
-      the devops.models.node_ext.fuel_slave module
-    - Every time when Node.start() invoked for the role 'fuel_slave',
+      the devops.models.node_ext.fuel_subordinate module
+    - Every time when Node.start() invoked for the role 'fuel_subordinate',
       execution will be performed like the following (simplified
       explanation):
 
@@ -254,12 +254,12 @@ class Node(
     # LEGACY, for fuel-qa compatibility
     @property
     def is_admin(self):
-        return 'master' in str(self.role)
+        return 'main' in str(self.role)
 
     # LEGACY, for fuel-qa compatibility
     @property
-    def is_slave(self):
-        return self.role == 'fuel_slave'
+    def is_subordinate(self):
+        return self.role == 'fuel_subordinate'
 
     def next_disk_name(self):
         disk_names = ('sd' + c for c in list('abcdefghijklmnopqrstuvwxyz'))
@@ -296,7 +296,7 @@ class Node(
             l2_network_device__name=name).order_by('id')[0]
         return interface.address_set.get(interface=interface).ip_address
 
-    # NOTE: this method works only for Fuel master node
+    # NOTE: this method works only for Fuel main node
     def get_ip_address_by_nailgun_network_name(self, name):
         interface = self.get_interface_by_nailgun_network_name(name)
         return interface.address_set.first().ip_address
@@ -307,7 +307,7 @@ class Node(
             auth=None):
         """Create SSH-connection to the network
 
-        NOTE: this method works only for master node
+        NOTE: this method works only for main node
 
         :rtype : SSHClient
         """

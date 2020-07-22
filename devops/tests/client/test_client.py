@@ -142,9 +142,9 @@ class TestDevopsClient(driverless.DriverlessTestCase):
             nodes_count=10,
             numa_nodes=0,
             second_volume_capacity=50,
-            slave_memory=3027,
-            slave_vcpu=2,
-            slave_volume_capacity=50,
+            subordinate_memory=3027,
+            subordinate_vcpu=2,
+            subordinate_volume_capacity=50,
             third_volume_capacity=50,
             use_all_disks=True,
         )

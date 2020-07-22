@@ -21,7 +21,7 @@ from devops.tests.driver.libvirt.base import LibvirtTestCase
 from django.conf import settings
 
 
-class TestCentosMasterExt(LibvirtTestCase):
+class TestCentosMainExt(LibvirtTestCase):
 
     def patch(self, *args, **kwargs):
         patcher = mock.patch(*args, **kwargs)
@@ -30,7 +30,7 @@ class TestCentosMasterExt(LibvirtTestCase):
         return m
 
     def setUp(self):
-        super(TestCentosMasterExt, self).setUp()
+        super(TestCentosMainExt, self).setUp()
 
         self.open_mock = mock.mock_open(read_data='image_data')
         self.patch('devops.driver.libvirt.libvirt_driver.open',
@@ -62,7 +62,7 @@ class TestCentosMasterExt(LibvirtTestCase):
 
         self.node = self.group.add_node(
             name='test-node',
-            role='centos_master',
+            role='centos_main',
             architecture='x86_64',
             hypervisor='test')
 

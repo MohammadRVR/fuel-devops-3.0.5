@@ -36,9 +36,9 @@ class NodeExtension(object):
 
         ip = self.node.get_ip_address_by_network_name(
             settings.SSH_CREDENTIALS['admin_network'])
-        master_iface = self.node.get_interface_by_network_name(
+        main_iface = self.node.get_interface_by_network_name(
             settings.SSH_CREDENTIALS['admin_network'])
-        admin_ap = master_iface.l2_network_device.address_pool
+        admin_ap = main_iface.l2_network_device.address_pool
 
         result_kernel_cmd = kernel_cmd.format(
             ip=ip,

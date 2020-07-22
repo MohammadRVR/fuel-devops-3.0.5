@@ -19,7 +19,7 @@ from devops import settings
 
 
 class NodeExtension(object):
-    """Extension for Centos Master node"""
+    """Extension for Centos Main node"""
 
     def __init__(self, node):
         self.node = node
@@ -31,7 +31,7 @@ class NodeExtension(object):
         helpers.wait_tcp(
             host=ip, port=self.node.ssh_port,
             timeout=self.node.bootstrap_timeout,
-            timeout_msg='Failed to bootstrap centos master')
+            timeout_msg='Failed to bootstrap centos main')
         logger.info('Centos cloud image bootstrap complete')
 
     def deploy_wait(self):

@@ -34,9 +34,9 @@ class TestDefaultTemplate(TestCase):
             admin_iso_path=settings.ISO_PATH,
             nodes_count=2,
             numa_nodes=settings.HARDWARE['numa_nodes'],
-            slave_vcpu=settings.HARDWARE["slave_node_cpu"],
-            slave_memory=settings.HARDWARE["slave_node_memory"],
-            slave_volume_capacity=settings.NODE_VOLUME_SIZE,
+            subordinate_vcpu=settings.HARDWARE["subordinate_node_cpu"],
+            subordinate_memory=settings.HARDWARE["subordinate_node_memory"],
+            subordinate_volume_capacity=settings.NODE_VOLUME_SIZE,
             second_volume_capacity=settings.NODE_VOLUME_SIZE,
             third_volume_capacity=settings.NODE_VOLUME_SIZE,
             use_all_disks=settings.USE_ALL_DISKS,
@@ -208,8 +208,8 @@ class TestDefaultTemplate(TestCase):
             format: raw
             name: iso
             source_image: null
-        role: fuel_master
-      - name: slave-01
+        role: fuel_main
+      - name: subordinate-01
         params:
           boot:
           - network
@@ -258,7 +258,7 @@ class TestDefaultTemplate(TestCase):
             name: cinder
           - capacity: 50
             name: swift
-        role: fuel_slave
+        role: fuel_subordinate
 """
 
     def test_acpi_and_numa(self):
@@ -271,9 +271,9 @@ class TestDefaultTemplate(TestCase):
             admin_iso_path=settings.ISO_PATH,
             nodes_count=2,
             numa_nodes=2,
-            slave_vcpu=8,
-            slave_memory=32 * 1024,
-            slave_volume_capacity=settings.NODE_VOLUME_SIZE,
+            subordinate_vcpu=8,
+            subordinate_memory=32 * 1024,
+            subordinate_volume_capacity=settings.NODE_VOLUME_SIZE,
             second_volume_capacity=settings.NODE_VOLUME_SIZE,
             third_volume_capacity=settings.NODE_VOLUME_SIZE,
             use_all_disks=settings.USE_ALL_DISKS,
@@ -449,8 +449,8 @@ class TestDefaultTemplate(TestCase):
             format: raw
             name: iso
             source_image: null
-        role: fuel_master
-      - name: slave-01
+        role: fuel_main
+      - name: subordinate-01
         params:
           boot:
           - network
@@ -503,5 +503,5 @@ class TestDefaultTemplate(TestCase):
             name: cinder
           - capacity: 50
             name: swift
-        role: fuel_slave
+        role: fuel_subordinate
 """

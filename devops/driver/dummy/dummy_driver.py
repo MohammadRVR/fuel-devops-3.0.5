@@ -202,8 +202,8 @@ class DummyNode(node.Node):
     yaml example:
 
     nodes:
-    - name: slave
-      role: fuel_slave
+    - name: subordinate
+      role: fuel_subordinate
       params:
         cpu: 2
         memory: 3072
